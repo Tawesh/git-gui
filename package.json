@@ -1,0 +1,62 @@
+{
+  "name": "git-tool",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node -e \"require('fs').accessSync('./index.js'); require('fs').accessSync('./index.html'); require('fs').accessSync('./preload.js'); require('fs').accessSync('./renderer.js'); require('fs').accessSync('./styles.css'); console.log('smoke ok')\"",
+    "prepare-icon": "node convert-icon.js",
+    "dist": "npm run prepare-icon && electron-builder --win"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "A simple local Git GUI tool",
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^24.13.3",
+    "png-to-ico": "^2.1.8"
+  },
+  "build": {
+    "appId": "com.tws.gittool",
+    "productName": "Git GUI Tool",
+    "files": [
+      "!**/.git/**",
+      "!**/.github/**",
+      "!**/.vscode/**",
+      "!**/node_modules/**",
+      "node_modules/electron/**",
+      "index.js",
+      "index.html",
+      "preload.js",
+      "renderer.js",
+      "styles.css",
+      "favicon.ico",
+      "icon.ico",
+      "free-give-my-money.jpg",
+      "fontawesome-free-7.1.0-desktop/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "electronDownload": {
+      "mirror": "https://github.com/electron/electron/releases/download/",
+      "customDir": "v39.2.7",
+      "customFilename": "electron-v39.2.7-win32-x64.zip"
+    },
+    "electronDist": "node_modules/electron/dist"
+  }
+}

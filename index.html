@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Git GUI Tool</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="toolbar">
+      <button id="btnOpenRepo" class="btn primary"><span class="ico primary" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/folder-open.svg')"></span> 打开仓库</button>
+      <button id="btnRefresh" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/arrows-rotate.svg')"></span> 刷新</button>
+      <span class="sep"></span>
+      <button id="btnInitRepo" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/box-archive.svg')"></span> 初始化仓库</button>
+      <button id="btnRemote" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/globe.svg')"></span> 远程仓库</button>
+      <button id="btnClone" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/clone.svg')"></span> 克隆仓库</button>
+      <span class="sep"></span>
+      <div class="branch">
+        <span class="label">分支:</span>
+        <span id="branchLabel" class="branch-value">未选择</span>
+      </div>
+      <button id="btnBranchMgr" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/code-branch.svg')"></span> 分支管理</button>
+      <button id="btnMergePull" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/code-merge.svg')"></span> 合并/拉取</button>
+      <button id="btnShowLog" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/chart-line.svg')"></span> 查看日志</button>
+      <button id="btnRevert" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/arrow-rotate-left.svg')"></span> 版本回退</button>
+      <span class="sep"></span>
+      <button id="btnSettings" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/gear.svg')"></span> 设置</button>
+      <div id="repoLabel" class="repo-label">未选择仓库</div>
+    </header>
+
+    <main class="container">
+      <section class="left">
+        <div class="panel">
+          <div class="panel-title"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/file-lines.svg')"></span> 未暂存文件 (Unstaged)</div>
+          <div class="panel-body">
+            <div class="search">
+              <span class="search-icon"><span class="ico muted" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/magnifying-glass.svg')"></span></span>
+              <input id="unstagedSearch" type="text" placeholder="过滤文件..." />
+            </div>
+            <ul id="unstagedList" class="file-list"></ul>
+            <div class="panel-actions">
+              <button id="btnAddSelected" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/plus.svg')"></span> Add 选中</button>
+              <button id="btnAddExternal" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/folder-plus.svg')"></span> Add 外部文件</button>
+              <button id="btnAddAll" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/check.svg')"></span> Add 全部</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/circle-check.svg')"></span> 已暂存文件 (Staged)</div>
+          <div class="panel-body">
+            <div class="search">
+              <span class="search-icon"><span class="ico muted" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/magnifying-glass.svg')"></span></span>
+              <input id="stagedSearch" type="text" placeholder="过滤文件..." />
+            </div>
+            <ul id="stagedList" class="file-list staged"></ul>
+            <div class="panel-actions">
+              <button id="btnResetSelected" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/minus.svg')"></span> Reset 选中</button>
+              <button id="btnResetAll" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/arrows-rotate.svg')"></span> Reset 全部</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="right">
+        <div class="panel">
+          <div class="panel-title"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/comment.svg')"></span> 提交信息</div>
+          <div class="panel-body">
+            <textarea id="commitMsg" rows="6" placeholder="输入提交信息..."></textarea>
+            <div class="templates">
+              <span class="label">快速模板:</span>
+              <div class="template-buttons">
+                <button class="btn small template" data-template="feat: ">feat:</button>
+                <button class="btn small template" data-template="fix: ">fix:</button>
+                <button class="btn small template" data-template="docs: ">docs:</button>
+                <button class="btn small template" data-template="style: ">style:</button>
+                <button class="btn small template" data-template="refactor: ">refactor:</button>
+              </div>
+            </div>
+            <div class="commit-actions">
+              <button id="btnCommit" class="btn primary grow"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/code-commit.svg')"></span> 提交</button>
+              <button id="btnPush" class="btn grow"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/cloud-arrow-up.svg')"></span> 推送</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel grow">
+          <div class="panel-title"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/file-lines.svg')"></span> 文件差异</div>
+          <div class="panel-body grow">
+            <div class="panel-actions">
+              <button id="btnEditFile" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/pen-to-square.svg')"></span> 编辑文件</button>
+              <button id="btnSaveFile" class="btn"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/floppy-disk.svg')"></span> 保存更改</button>
+            </div>
+            <div id="editorWrap" class="editor-wrap" style="display: none">
+              <div id="editorGutter" class="gutter" aria-hidden="true"></div>
+              <textarea id="editorView" class="editor" rows="12" spellcheck="false" placeholder="在此编辑选中文件内容..."></textarea>
+            </div>
+            <pre id="diffView" class="diff"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="statusbar">
+      <div id="statusLabel" class="status">就绪</div>
+      <div id="fileCount" class="counts">未暂存: 0 | 已暂存: 0</div>
+    </footer>
+
+    <dialog id="dlgClone" class="dlg">
+      <form method="dialog" class="dlg-form">
+        <h2>克隆远程仓库</h2>
+        <label class="field">
+          <span>远程仓库 URL</span>
+          <input id="cloneUrl" type="text" autocomplete="off" />
+        </label>
+        <div class="row">
+          <label class="field grow">
+            <span>目标父目录</span>
+            <input id="cloneParent" type="text" readonly />
+          </label>
+          <button id="btnChooseCloneParent" class="btn">选择目录</button>
+        </div>
+        <div class="dlg-actions">
+          <button id="btnCloneDo" class="btn primary" value="ok">克隆</button>
+          <button class="btn" value="cancel">取消</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgRemote" class="dlg">
+      <form method="dialog" class="dlg-form">
+        <h2>远程仓库管理</h2>
+        <label class="field">
+          <span>Origin URL</span>
+          <input id="remoteUrl" type="text" autocomplete="off" />
+        </label>
+        <div class="dlg-actions">
+          <button id="btnRemoteSave" class="btn primary" value="ok">设置/更新</button>
+          <button id="btnRemoteRemove" class="btn" value="remove">移除关联</button>
+          <button class="btn" value="cancel">取消</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgMergePull" class="dlg">
+      <form method="dialog" class="dlg-form">
+        <h2>合并/拉取</h2>
+        <label class="field">
+          <span>操作</span>
+          <select id="mpOp">
+            <option value="pull">拉取</option>
+            <option value="merge">合并</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>源分支</span>
+          <select id="mpSource"></select>
+        </label>
+        <label class="field">
+          <span>目标分支</span>
+          <select id="mpTarget"></select>
+        </label>
+        <div class="dlg-actions">
+          <button id="btnMergePullDo" class="btn primary" value="ok">执行</button>
+          <button class="btn" value="cancel">取消</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgLog" class="dlg wide">
+      <form method="dialog" class="dlg-form">
+        <h2>提交日志</h2>
+        <pre id="logView" class="log"></pre>
+        <div class="dlg-actions">
+          <button class="btn primary" value="ok">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgRevert" class="dlg wide">
+      <form method="dialog" class="dlg-form">
+        <h2>版本回退</h2>
+        <div class="revert-layout">
+          <div class="revert-left">
+            <div class="label">选择要回退到的提交</div>
+            <ul id="commitList" class="commit-list"></ul>
+          </div>
+          <div class="revert-right">
+            <div class="label">回退类型</div>
+            <label class="radio"><input type="radio" name="revertMode" value="soft" checked />软回退 (保留文件更改)</label>
+            <label class="radio"><input type="radio" name="revertMode" value="mixed" />混合回退 (保留文件但清除暂存区)</label>
+            <label class="radio"><input type="radio" name="revertMode" value="hard" />硬回退 (完全清除更改)</label>
+          </div>
+        </div>
+        <div class="dlg-actions">
+          <button id="btnRevertDo" class="btn primary" value="ok">执行回退</button>
+          <button class="btn" value="cancel">取消</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgBranches" class="dlg wide">
+      <form method="dialog" class="dlg-form">
+        <h2>分支管理</h2>
+        <div class="tabs">
+          <button type="button" class="tab active" data-tab="local">本地分支</button>
+          <button type="button" class="tab" data-tab="remote">远程分支</button>
+          <button type="button" class="tab" data-tab="create">新建分支</button>
+        </div>
+        <section class="tab-panel active" data-panel="local">
+          <ul id="localBranchList" class="branch-list"></ul>
+          <div class="dlg-actions">
+            <button id="btnCheckoutLocal" class="btn primary" value="noop">切换到选中分支</button>
+            <button id="btnRefreshBranches1" class="btn" value="noop">刷新列表</button>
+          </div>
+        </section>
+        <section class="tab-panel" data-panel="remote">
+          <ul id="remoteBranchList" class="branch-list"></ul>
+          <div class="dlg-actions">
+            <button id="btnCheckoutRemote" class="btn primary" value="noop">检出选中分支</button>
+            <button id="btnRefreshBranches2" class="btn" value="noop">刷新列表</button>
+          </div>
+        </section>
+        <section class="tab-panel" data-panel="create">
+          <label class="field">
+            <span>分支名称</span>
+            <input id="newBranchName" type="text" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>基于分支</span>
+            <select id="newBranchBase"></select>
+          </label>
+          <div class="dlg-actions">
+            <button id="btnCreateBranch" class="btn primary" value="noop">创建分支</button>
+          </div>
+        </section>
+        <div class="dlg-actions">
+          <button class="btn primary" value="ok">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgAddExternal" class="dlg wide">
+      <form method="dialog" class="dlg-form">
+        <h2>Add 外部文件</h2>
+        <div class="row">
+          <label class="field grow">
+            <span>已选文件</span>
+            <input id="extFiles" type="text" readonly />
+          </label>
+          <button id="btnChooseExtFiles" class="btn">选择文件</button>
+        </div>
+        <div class="row">
+          <label class="field grow">
+            <span>目标目录(仓库内)</span>
+            <input id="extDestDir" type="text" readonly />
+          </label>
+          <button id="btnChooseExtDest" class="btn">选择目录</button>
+        </div>
+        <label class="check">
+          <input id="extOverwrite" type="checkbox" />
+          <span>允许覆盖同名文件</span>
+        </label>
+        <div class="dlg-actions">
+          <button id="btnDoAddExternal" class="btn primary" value="ok">添加</button>
+          <button class="btn" value="cancel">取消</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgMessage" class="dlg msg">
+      <form method="dialog" class="dlg-form">
+        <div class="dlg-head">
+          <div class="dlg-head-left">
+            <div id="msgIcon" class="msg-icon" aria-hidden="true" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/circle-info.svg')"></div>
+            <h2 id="msgTitle">提示</h2>
+          </div>
+          <button id="btnMsgClose" class="icon-btn" value="cancel" aria-label="关闭"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/xmark.svg')"></span></button>
+        </div>
+        <div class="msg-body">
+          <div id="msgText" class="msg-text"></div>
+          <pre id="msgDetails" class="msg-details"></pre>
+        </div>
+        <div class="dlg-actions">
+          <button id="btnMsgCancel" class="btn" value="cancel">取消</button>
+          <button id="btnMsgOk" class="btn primary" value="ok">确定</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgGuide" class="dlg wide guide">
+      <form method="dialog" class="dlg-form">
+        <div class="dlg-head">
+          <div class="dlg-head-left">
+            <div class="msg-icon" aria-hidden="true" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/route.svg')"></div>
+            <h2 id="guideTitle">新手引导</h2>
+          </div>
+          <button class="icon-btn" value="cancel" aria-label="关闭"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/xmark.svg')"></span></button>
+        </div>
+        <div class="guide-body">
+          <div id="guideDesc" class="guide-desc"></div>
+          <ol id="guideSteps" class="guide-steps"></ol>
+        </div>
+        <div class="dlg-actions">
+          <button id="btnGuideSkip" type="button" class="btn">跳过</button>
+          <button id="btnGuidePrev" type="button" class="btn">上一步</button>
+          <button id="btnGuideNext" type="button" class="btn primary">下一步</button>
+          <button id="btnGuideFinish" type="button" class="btn primary">完成</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlgSettings" class="dlg wide settings">
+      <form method="dialog" class="dlg-form">
+        <div class="dlg-head">
+          <div class="dlg-head-left">
+            <div class="msg-icon" aria-hidden="true" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/gear.svg')"></div>
+            <h2>设置</h2>
+          </div>
+          <button class="icon-btn" value="cancel" aria-label="关闭"><span class="ico" style="--ico: url('./fontawesome-free-7.1.0-desktop/svgs-full/solid/xmark.svg')"></span></button>
+        </div>
+
+        <div class="settings-layout">
+          <nav class="settings-nav" aria-label="设置导航">
+            <button type="button" class="settings-tab active" data-tab="prefs">偏好设置</button>
+            <button type="button" class="settings-tab" data-tab="user">用户设置</button>
+            <button type="button" class="settings-tab" data-tab="git">Git 安装</button>
+            <button type="button" class="settings-tab" data-tab="about">软件说明</button>
+            <button type="button" class="settings-tab" data-tab="contact">联系我们</button>
+          </nav>
+
+          <section class="settings-panel active" data-panel="prefs">
+            <div class="settings-section">
+              <div class="settings-title">常用</div>
+              <label class="toggle">
+                <input id="prefAutoRefreshOnOpen" type="checkbox" />
+                <span class="toggle-text">打开仓库后自动刷新</span>
+              </label>
+              <label class="toggle">
+                <input id="prefConfirmDangerous" type="checkbox" />
+                <span class="toggle-text">危险操作需要二次确认</span>
+              </label>
+              <label class="toggle">
+                <input id="prefAutoLoadDiff" type="checkbox" />
+                <span class="toggle-text">点击文件自动显示差异</span>
+              </label>
+              <div class="dlg-actions">
+                <button id="btnResetPrefs" type="button" class="btn">恢复默认</button>
+                <button id="btnOpenGuide" type="button" class="btn primary">查看新手引导</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-panel" data-panel="user">
+            <div class="settings-section">
+              <div class="settings-title">Git 用户设置</div>
+              <label class="toggle">
+                <input id="userGlobalScope" type="checkbox" />
+                <span class="toggle-text">全局配置（对所有仓库生效）</span>
+              </label>
+              <label class="field">
+                <span>用户名</span>
+                <input id="userName" type="text" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span>邮箱</span>
+                <input id="userEmail" type="text" autocomplete="off" />
+              </label>
+              <div class="dlg-actions">
+                <button id="btnUserSave" type="button" class="btn primary">保存</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-panel" data-panel="git">
+            <div class="settings-section">
+              <div class="settings-title">Git 安装检测</div>
+              <div class="kv">
+                <div class="k">状态</div>
+                <div class="v">
+                  <span id="gitDetectStatus">未检测</span>
+                  <button id="btnGitDetect" type="button" class="btn small">自动检测</button>
+                </div>
+              </div>
+              <div class="kv">
+                <div class="k">版本</div>
+                <div id="gitVersion" class="v">-</div>
+              </div>
+              <label class="field">
+                <span>Git 路径</span>
+                <input id="gitPathInput" type="text" autocomplete="off" placeholder="例如 C:\\Program Files\\Git\\bin\\git.exe" />
+              </label>
+              <div class="dlg-actions">
+                <button id="btnPickGitPath" type="button" class="btn">浏览</button>
+                <button id="btnSaveGitPath" type="button" class="btn primary">保存</button>
+                <button id="btnDownloadGit" type="button" class="btn">下载 Git</button>
+              </div>
+              <div class="settings-note">
+                若未安装，请访问官方站点下载并安装后重新检测：<span>https://git-scm.com/</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-panel" data-panel="about">
+            <div class="settings-section">
+              <div class="settings-title">软件说明</div>
+              <div class="kv">
+                <div class="k">名称</div>
+                <div id="aboutName" class="v">Git GUI Tool</div>
+              </div>
+              <div class="kv">
+                <div class="k">版本</div>
+                <div id="aboutVersion" class="v">-</div>
+              </div>
+              <div class="kv">
+                <div class="k">平台</div>
+                <div id="aboutPlatform" class="v">-</div>
+              </div>
+              <div class="settings-note">
+                这是一个本地 Git 图形化工具：支持查看状态、暂存/撤销、差异、提交、推送、分支管理、合并/拉取与版本回退。除 Git 本身与远程仓库交互外，应用不会主动上传你的仓库内容。
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-panel" data-panel="contact">
+            <div class="settings-section">
+              <div class="settings-title">联系我们</div>
+              <div class="kv">
+                <div class="k">邮箱</div>
+                <div class="v">
+                  <span id="contactEmail">879323377@qq.com</span>
+                  <button id="btnCopyEmail" type="button" class="btn small">复制</button>
+                </div>
+              </div>
+              <div class="kv">
+                <div class="k">网址</div>
+                <div class="v">
+                  <a id="contactWebsite" href="#" class="link">https://tws-site.cn</a>
+                </div>
+              </div>
+              <div class="settings-note">如需定制功能或反馈问题，请附上日志与复现步骤。</div>
+            </div>
+          </section>
+        </div>
+
+        <div class="dlg-actions">
+          <button class="btn primary" value="ok">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>
